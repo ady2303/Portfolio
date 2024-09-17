@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const navigationDots = document.querySelector('.navigation-dots');
     const sections = document.querySelectorAll('section');
+    const carousels = document.querySelectorAll('.carousel-slide');
 
     // Create navigation dots
     sections.forEach((section, index) => {
@@ -9,7 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
         dot.classList.add('dot');
         dot.setAttribute('data-index', index);
         
-        const sectionTitle = section.querySelector('h1, h2').textContent;
+        let sectionTitle;
+        if (index === 0) {
+            sectionTitle = "Home";
+        } else {
+            sectionTitle = section.querySelector('h2').textContent;
+        }
         dot.setAttribute('title', sectionTitle);
         
         dot.addEventListener('click', () => {
@@ -25,41 +31,94 @@ document.addEventListener('DOMContentLoaded', () => {
         navigationDots.appendChild(dot);
     });
 
-    // Update active dot on scroll
-    function updateActiveDot() {
-        const scrollPosition = window.scrollY;
-
-        sections.forEach((section, index) => {
-            const dot = navigationDots.querySelector(`[data-index="${index}"]`);
-            const sectionTop = section.offsetTop - (window.innerHeight / 2);
-            const sectionBottom = sectionTop + section.offsetHeight;
-
-            if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-            }
-        });
-    }
-
-    window.addEventListener('scroll', updateActiveDot);
-    updateActiveDot(); // Initial call to set the active dot on page load
-
-    // Trigger animations when sections come into view
+    // Intersection Observer for detecting visible section
     const observerOptions = {
         root: null,
-        rootMargin: '0px',
-        threshold: 0.1
+        rootMargin: '-50% 0px',
+        threshold: 0
     };
 
-    const observer = new IntersectionObserver((entries) => {
+    const observerCallback = (entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                document.querySelectorAll('.dot').forEach(dot => dot.classList.remove('active'));
+                const index = Array.from(sections).indexOf(entry.target);
+                const activeDot = navigationDots.querySelector(`[data-index="${index}"]`);
+                if (activeDot) activeDot.classList.add('active');
+            }
+        });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    sections.forEach(section => observer.observe(section));
+
+    // Carousel functionality
+    carousels.forEach(carousel => {
+        let currentSlide = 0;
+        const slides = carousel.querySelectorAll('img');
+        const totalSlides = slides.length;
+        const prevButton = carousel.parentElement.querySelector('.prev');
+        const nextButton = carousel.parentElement.querySelector('.next');
+
+        function updateSlide() {
+            carousel.style.transform = `translateX(-${currentSlide * 33.333}%)`;
+        }
+
+        prevButton.addEventListener('click', () => {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateSlide();
+        });
+
+        nextButton.addEventListener('click', () => {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlide();
+        });
+
+        // Optional: Add keyboard navigation for the carousel
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+                updateSlide();
+            } else if (e.key === 'ArrowRight') {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                updateSlide();
+            }
+        });
+
+        // Optional: Add touch swipe functionality for mobile devices
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        carousel.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        carousel.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX) {
+                // Swipe left
+                currentSlide = (currentSlide + 1) % totalSlides;
+            } else if (touchEndX > touchStartX) {
+                // Swipe right
+                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            }
+            updateSlide();
+        }
+    });
+
+    // Trigger animations when elements come into view
+    const animationObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.style.opacity = 1;
                 entry.target.style.transform = 'translateY(0)';
             }
         });
-    }, observerOptions);
+    }, { threshold: 0.1 });
 
-    document.querySelectorAll('h1, h2, p').forEach(el => observer.observe(el));
+    document.querySelectorAll('h1, h2, p').forEach(el => animationObserver.observe(el));
 });

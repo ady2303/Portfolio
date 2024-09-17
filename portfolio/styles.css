@@ -26,7 +26,7 @@ body, html {
 }
 
 section {
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -34,6 +34,19 @@ section {
     padding: 2rem;
     scroll-snap-align: start;
     transition: background-color 0.5s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(97, 218, 251, 0.1) 0%, rgba(18, 18, 18, 0) 70%);
+    z-index: -1;
 }
 
 section:nth-child(odd) {
@@ -51,6 +64,7 @@ h1, h2 {
 h1 {
     font-size: 4rem;
     color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(97, 218, 251, 0.5);
 }
 
 h2 {
@@ -83,6 +97,11 @@ p {
 .tech {
     font-style: italic;
     color: var(--accent-color);
+}
+
+.achievement {
+    font-weight: bold;
+    color: var(--primary-color);
 }
 
 .about-details {
@@ -130,14 +149,10 @@ p {
     position: relative;
 }
 
-/* New styles for the square home dot */
-.dot[data-index="0"] {
-    border-radius: 0;
-}
-
 .dot:hover, .dot.active {
     background-color: var(--primary-color);
     transform: scale(1.2);
+    box-shadow: 0 0 10px var(--primary-color);
 }
 
 .dot .tooltip {
@@ -159,6 +174,90 @@ p {
 .dot:hover .tooltip {
     opacity: 1;
     transform: translateY(-50%) translateX(-5px);
+}
+
+.project-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 2rem;
+}
+
+.project-info {
+    width: 45%;
+    padding: 0 20px;
+}
+
+.carousel-container {
+    width: 50%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-slide {
+    display: flex;
+    width: 300%;
+    transition: transform 0.5s ease;
+}
+
+.carousel-slide img {
+    width: 33.333%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    object-position: center;
+}
+
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.3s ease, transform 0.3s ease;
+    border-radius: 50%;
+    z-index: 10;
+}
+
+.carousel-button:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-button.prev {
+    left: 10px;
+}
+
+.carousel-button.next {
+    right: 10px;
+}
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.carousel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--text-color-secondary);
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.carousel-dot.active {
+    background-color: var(--primary-color);
+    transform: scale(1.2);
 }
 
 footer {
@@ -202,5 +301,17 @@ footer {
 
     .dot .tooltip {
         display: none;
+    }
+
+    .project-content {
+        flex-direction: column;
+    }
+
+    .project-info, .carousel-container {
+        width: 100%;
+    }
+
+    .carousel-container {
+        margin-top: 1rem;
     }
 }
